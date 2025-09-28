@@ -1,1 +1,205 @@
 /* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+@import './variable.css';
+
+/* styles.css */
+body {
+  font-family: 'Roboto Mono', monospace;
+}
+/* All custom styles from the original <style> tag go here */
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif;
+}
+/*
+ * Apply styles to the component's root element.
+ * This sets up the theme variables and the host container's layout.
+ */
+:host {
+  /* --- THEME VARIABLES --- */
+  --color-background: #0a1128;
+  --color-primary: #e30022;
+  --color-primary-dark: #cc001f;
+  --color-secondary: #00aeef;
+  --color-text-light: #ffffff;
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Roboto Mono', monospace;
+  --color-primary-rgb: 227, 0, 34;
+}
+
+/* Base styles for the component's host container */
+.host-container {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem; /* p-4 */
+  background-size: cover;
+  background-position: center;
+}
+
+.font-orbitron {
+  font-family: var(--font-heading);
+}
+
+/* Animated Scanline Overlay */
+.scanline-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 17, 40, 0) 0%,
+    rgba(10, 17, 40, 0.4) 50%,
+    rgba(10, 17, 40, 0) 100%
+  );
+  background-size: 100% 8px;
+  animation: scanline 10s linear infinite;
+  pointer-events: none;
+}
+@keyframes scanline {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -200px;
+  }
+}
+
+/* Glitch effect on header */
+.glitch {
+  position: relative;
+  color: var(--color-text-light);
+  text-shadow: 0 0 5px var(--color-primary);
+}
+.glitch:before,
+.glitch:after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-background);
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.glitch:before {
+  left: -2px;
+  text-shadow: 2px 0 var(--color-secondary);
+  animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+}
+.glitch:after {
+  left: 2px;
+  text-shadow: -2px 0 var(--color-primary);
+  animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim-1 {
+  0% {
+    clip: rect(15px, 9999px, 85px, 0);
+  }
+  100% {
+    clip: rect(85px, 9999px, 15px, 0);
+  }
+}
+@keyframes glitch-anim-2 {
+  0% {
+    clip: rect(5px, 9999px, 95px, 0);
+  }
+  100% {
+    clip: rect(95px, 9999px, 5px, 0);
+  }
+}
+
+/* Input field focus glow */
+.form-input:focus {
+  box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.7);
+  border-color: var(--color-primary);
+}
+
+/* HUD Corner Brackets */
+.corner-bracket {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border-color: var(--color-primary);
+  border-style: solid;
+  opacity: 0.6;
+}
+.corner-bracket.top-left {
+  top: -2px;
+  left: -2px;
+  border-width: 3px 0 0 3px;
+}
+.corner-bracket.top-right {
+  top: -2px;
+  right: -2px;
+  border-width: 3px 3px 0 0;
+}
+.corner-bracket.bottom-left {
+  bottom: -2px;
+  left: -2px;
+  border-width: 0 0 3px 3px;
+}
+.corner-bracket.bottom-right {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 3px 3px 0;
+}
+
+/* Blinking Caret for Labels */
+.blinking-caret-label {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background-color: var(--color-primary);
+  margin-left: 8px;
+  animation: blink 1s infinite step-end;
+}
+
+/* Animated Status Text */
+.status-text-content {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: typing 3s steps(30, end) forwards;
+}
+.blinking-caret-standalone {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background-color: var(--color-primary);
+  animation: blink 1s infinite step-end;
+}
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Web Pattern Overlay */
+.web-pattern-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 0L0 100h100V0zM0 0l100 100V0z' fill='%23FFFFFF' fill-opacity='0.1'/%3E%3C/svg%3E");
+  background-size: 20px 20px;
+  background-blend-mode: overlay;
+}

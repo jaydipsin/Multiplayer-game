@@ -1,0 +1,55 @@
+<div class="host-container"
+     style="background-image: url('https://images.unsplash.com/photo-1543782207-6c84c20b8527?q=80&w=2500&auto=format&fit=crop');">
+
+    <div class="absolute inset-0 bg-black opacity-70"></div>
+    <div class="scanline-overlay"></div>
+    <div class="web-pattern-overlay"></div>
+
+    <main class="relative w-full max-w-md bg-gray-900/80 backdrop-blur-sm border-2 border-[var(--color-primary)]/40 rounded-lg p-6 sm:p-8 shadow-2xl shadow-[rgba(var(--color-primary-rgb),0.2)]">
+        
+        <div class="corner-bracket top-left"></div>
+        <div class="corner-bracket top-right"></div>
+        <div class="corner-bracket bottom-left"></div>
+        <div class="corner-bracket bottom-right"></div>
+
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-3xl sm:text-4xl glitch" data-text="[ WEB_ACCESS ]">[ WEB_ACCESS ]</h1>
+            <p class="text-white/70 mt-2 text-sm">// IDENTITY_SCAN REQUIRED</p>
+        </header>
+
+        <form>
+            <div class="mb-6">
+                <label for="username" class="flex items-center text-sm font-medium text-[var(--color-primary)]/90 mb-2">
+                    <span>CALLSIGN / ID</span>
+                    <span class="blinking-caret-label"></span>
+                </label>
+                <input type="text" id="username" placeholder="// Enter Alias or Fingerprint ID"
+                       class="form-input w-full bg-gray-800/70 border-2 border-[var(--color-primary)]/30 rounded-md px-4 py-2 text-gray-100 placeholder-gray-400 transition duration-300 focus:outline-none">
+            </div>
+
+            <div class="mb-8">
+                <label for="password" class="flex items-center text-sm font-medium text-[var(--color-primary)]/90 mb-2">
+                    <span>BIO_KEY</span>
+                    <span class="blinking-caret-label"></span>
+                </label>
+                <input type="password" id="password" placeholder="••••••••••••"
+                       class="form-input w-full bg-gray-800/70 border-2 border-[var(--color-primary)]/30 rounded-md px-4 py-2 text-gray-100 placeholder-gray-400 transition duration-300 focus:outline-none">
+            </div>
+
+            <button type="submit" class="w-full cursor-pointer bg-[var(--color-primary)] text-white font-bold py-3 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0">
+                [ INITIATE SWING ]
+            </button>
+        </form>
+
+        <div class="flex items-center my-6">
+            <hr class="flex-grow border-[var(--color-primary)]/30">
+        </div>
+        
+        <footer class="text-left">
+            <div class="text-xs text-[var(--color-primary)]/60 inline-flex items-center">
+                <span class="status-text-content">// SYSTEM: AWAITING_ID_VERIFICATION...</span>
+                <span class="blinking-caret-standalone"></span>
+            </div>
+        </footer>
+    </main>
+</div>

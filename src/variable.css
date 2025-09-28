@@ -1,0 +1,11 @@
+:root {
+  --color-background: #0a1128;
+  --color-primary: #e30022;
+  --color-primary-dark: #cc001f;
+  --color-secondary: #00aeef;
+  --color-text-light: #ffffff;
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Roboto Mono', monospace;
+  /* RGB version of primary color for use with opacity */
+  --color-primary-rgb: 227, 0, 34;
+}
