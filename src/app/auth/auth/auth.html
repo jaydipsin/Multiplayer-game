@@ -1,3 +1,9 @@
+@if(showModal()){
+<app-dialog-modal
+  [description]="modalDescription"
+  (closeButtonClick)="onModalClose()"
+></app-dialog-modal>
+}
 <div
   class="host-container"
   style="
@@ -23,7 +29,9 @@
       <p class="text-white/70 mt-2 text-sm">// IDENTITY_SCAN REQUIRED</p>
     </header>
 
-    <form>
+    <form [formGroup]="testForm" (ngSubmit)="isLoginMode ? onLogin() : onSignUp()">
+      @if(!isLoginMode){
+
       <div class="mb-6">
         <label
           for="username"
@@ -35,7 +43,26 @@
         <input
           type="text"
           id="username"
+          formControlName="username"
           placeholder="// Enter Alias or Fingerprint ID"
+          class="form-input w-full bg-gray-800/70 border-2 border-[var(--color-primary)]/30 rounded-md px-4 py-2 text-gray-100 placeholder-gray-400 transition duration-300 focus:outline-none"
+        />
+      </div>
+      }
+      <div class="mb-6">
+        <label
+          for="email"
+          class="flex items-center text-sm font-medium text-[var(--color-primary)]/90 mb-2"
+        >
+          <span>CALLSIGN / EMAIL</span>
+          <span class="blinking-caret-label"></span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="// Enter Email"
           class="form-input w-full bg-gray-800/70 border-2 border-[var(--color-primary)]/30 rounded-md px-4 py-2 text-gray-100 placeholder-gray-400 transition duration-300 focus:outline-none"
         />
       </div>
@@ -49,7 +76,9 @@
           <span class="blinking-caret-label"></span>
         </label>
         <input
+          formControlName="password"
           type="password"
+          autocomplete="current-password"
           id="password"
           placeholder="••••••••••••"
           class="form-input w-full bg-gray-800/70 border-2 border-[var(--color-primary)]/30 rounded-md px-4 py-2 text-gray-100 placeholder-gray-400 transition duration-300 focus:outline-none"
@@ -106,12 +135,20 @@
         <span class="blinking-caret-standalone"></span>
       </div>
       <div>
-        <a
+        <button
+          (click)="onModeSwitch()"
           href="#"
           class="text-sm text-white/60 border-b border-dotted border-white/40 hover:text-white hover:border-solid hover:border-white transition-all duration-300"
         >
           New Recruit? &gt;&gt; INITIATE_REGISTRATION
-        </a>
+        </button>
+        <button
+          (click)="test()"
+          href="#"
+          class="text-sm text-white/60 border-b border-dotted border-white/40 hover:text-white hover:border-solid hover:border-white transition-all duration-300"
+        >
+        Test
+      </button>
       </div>
     </footer>
   </main>

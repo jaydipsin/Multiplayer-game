@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { User } from '../../model/user.type';
+import { IloginResponse, IsignUpResponse, IsingUpPayload } from '../model/auth.interface';
 
 /* Login Actions */
 export const loginAction = createAction(
@@ -9,7 +10,7 @@ export const loginAction = createAction(
 
 export const loginSuccessAction = createAction(
   '[Auth] Login Success Action',
-  props<{ user: User; token: string }>()
+  props<IloginResponse>()
 );
 
 export const loginFailureAction = createAction(
@@ -18,14 +19,11 @@ export const loginFailureAction = createAction(
 );
 
 /* Signup Actions */
-export const signupAction = createAction(
-  '[Auth] Signup Action',
-  props<{ name: string; email: string; password: string }>()
-);
+export const signupAction = createAction('[Auth] Signup Action', props<IsingUpPayload>());
 
 export const signupSuccessAction = createAction(
   '[Auth] Signup Success Action',
-  props<{ user: User; token: string }>()
+  props<IsignUpResponse>()
 );
 
 export const signupFailureAction = createAction(
