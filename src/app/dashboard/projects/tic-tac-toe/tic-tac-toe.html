@@ -1,0 +1,83 @@
+@if(!isGameStart()){
+<app-invite-modal></app-invite-modal>
+}
+
+<div class="host-container">
+  <div class="scanline-overlay"></div>
+  <div class="web-pattern-overlay"></div>
+
+  <nav
+    class="bg-gray-900/50 backdrop-blur-sm border-b-2 border-[var(--color-primary)]/40 sticky top-0 z-10"
+  >
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="font-orbitron text-2xl text-white">
+          BATTLE<span class="text-[var(--color-primary)]">:GRID</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-white/80 hidden sm:block">Welcome, {{ userName }}</span>
+          <img
+            class="h-10 w-10 rounded-full border-2 border-[var(--color-secondary)]"
+            [src]="avatarUrl"
+            alt="User Avatar"
+          />
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
+    <div
+      class="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-sm border-2 border-[var(--color-primary)]/40 rounded-lg p-6 sm:p-8 shadow-2xl shadow-[rgba(var(--color-primary-rgb),0.2)]"
+    >
+      <div class="corner-bracket top-left"></div>
+      <div class="corner-bracket top-right"></div>
+      <div class="corner-bracket bottom-left"></div>
+      <div class="corner-bracket bottom-right"></div>
+
+      <header class="text-center mb-6">
+        <h1 class="font-orbitron text-3xl sm:text-4xl glitch" [attr.data-text]="statusMessage">
+          {{ statusMessage }}
+        </h1>
+        <div class="flex justify-center items-center space-x-6 mt-4 text-xl font-orbitron">
+          <div class="text-[var(--color-primary)]">Player X: {{ scores.X }}</div>
+          <div class="text-white/50">VS</div>
+          <div class="text-[var(--color-secondary)]">Player O: {{ scores.O }}</div>
+        </div>
+      </header>
+
+      <div class="game-board w-full max-w-md mx-auto relative">
+        @for (cell of board; track $index) {
+        <button
+          class="game-cell group"
+          (click)="makeMove($index)"
+          [disabled]="cell !== null || !!winner"
+          [class.cell-x]="cell === 'X'"
+          [class.cell-o]="cell === 'O'"
+        >
+          {{ cell }}
+
+          @if (!cell && !winner) {
+          <span
+            class="absolute text-6xl opacity-0 group-hover:opacity-20 transition-opacity"
+            [class.text-[var(--color-primary)]]="currentPlayer === 'X'"
+            [class.text-[var(--color-secondary)]]="currentPlayer === 'O'"
+          >
+            {{ currentPlayer }}
+          </span>
+          }
+        </button>
+        }
+      </div>
+
+      <footer class="mt-8 text-center">
+        <button
+          (click)="startNewGame()"
+          class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-8 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
+        >
+          [ RESET_GRID ]
+        </button>
+      </footer>
+    </div>
+  </main>
+</div>
