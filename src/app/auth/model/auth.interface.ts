@@ -1,8 +1,7 @@
-import { BaseMongoFields } from "../../model/app.model";
-import { User } from "../../model/user.type";
+import { BaseMongoFields } from '../../model/app.model';
+import { User } from '../../model/user.type';
 
 export interface authState {
-  refreshToken: string | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   errorMessage: string | null;
@@ -15,8 +14,9 @@ export interface IsingUpPayload {
 }
 
 export interface IsignUpResponse {
+  accessToken: string;
+  user: User;
   message: string;
-  isRegisterd: boolean;
 }
 
 export interface IloginPayload {
@@ -24,10 +24,8 @@ export interface IloginPayload {
   password: string;
 }
 
-
 export interface IloginResponse extends BaseMongoFields {
-  refreshToken:string;
-  accessToken:string;
+  accessToken: string;
   user: User;
   message: string;
 }

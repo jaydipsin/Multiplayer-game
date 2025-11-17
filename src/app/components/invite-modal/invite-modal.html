@@ -1,0 +1,79 @@
+<div
+  (click)="onCloseClick()"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+>
+  <main
+    (click)="onDialogClick($event)"
+    class="modal-enter relative w-full max-w-lg bg-gray-900/80 border-2 border-[var(--color-primary)]/40 rounded-lg p-6 shadow-2xl shadow-[rgba(var(--color-primary-rgb),0.2)]"
+  >
+    <div class="corner-bracket top-left"></div>
+    <div class="corner-bracket top-right"></div>
+    <div class="corner-bracket bottom-left"></div>
+    <div class="corner-bracket bottom-right"></div>
+    <div class="web-pattern-overlay rounded-lg"></div>
+
+    <header
+      class="flex items-center justify-between pb-4 border-b border-[var(--color-primary)]/20"
+    >
+      <h2
+        class="font-orbitron text-xl text-[var(--color-text-light)] glitch"
+        [attr.data-text]="title"
+      >
+        {{ title }}
+      </h2>
+      <button
+        (click)="onCloseClick()"
+        class="text-white/50 hover:text-[var(--color-primary)] transition-colors duration-300"
+        aria-label="Close modal"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+    </header>
+
+    <section class="py-6 text-white/80 space-y-4">
+      <div *ngIf="mode === 'share'">
+        <p>Share this code with your guest so they can join:</p>
+        <div class="my-4 p-4 text-center bg-black/30 border border-white/20 rounded-lg">
+          <span class="font-orbitron text-3xl tracking-widest text-[var(--color-primary)]">
+            {{ shareCode }}
+          </span>
+        </div>
+        <p class="text-sm text-white/60">This code is single-use and will expire.</p>
+      </div>
+
+      <div>
+        <p>Enter the invitation code you received to join:</p>
+        <input
+          [(ngModel)]="enteredCode"
+          type="text"
+          placeholder="ENTER CODE"
+          class="form-input w-full mt-4 text-center font-orbitron text-2xl tracking-widest"
+          maxlength="10"
+          autofocus
+        />
+      </div>
+    </section>
+
+    <footer class="flex justify-end pt-4 space-x-4">
+      <button
+        (click)="onCloseClick()"
+        class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
+      >
+        [ Close ]
+      </button>
+      <button
+        (click)="onConfirmClick()"
+        class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
+      >
+        [ Submit ]
+      </button>
+    </footer>
+  </main>
+</div>

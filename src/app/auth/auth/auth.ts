@@ -3,12 +3,18 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActionsSubject, Store } from '@ngrx/store';
-import { loginAction, signupAction, signupSuccessAction } from '../store/auth.action';
+import {
+  loginAction,
+  loginSuccessAction,
+  signupAction,
+  signupSuccessAction,
+} from '../store/auth.action';
 import { DialogModal } from '../../components/dialog-modal/dialog-modal';
 import { Actions, ofType } from '@ngrx/effects';
 import { map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { BASE_URL } from '../../constants';
+import { Localstorage } from '../../services/localstorage';
 
 @Component({
   selector: 'app-auth',
@@ -29,7 +35,8 @@ export class Auth implements OnInit {
     private store: Store,
     private fb: FormBuilder,
     private action$: Actions,
-    private http: HttpClient
+    private http: HttpClient,
+    private localStorageService: Localstorage
   ) {}
   ngOnInit(): void {
     this.setMode();
@@ -55,7 +62,6 @@ export class Auth implements OnInit {
   }
 
   onSignUp() {
-    // this.http.post(`${BASE_URL}/refresh`, {}, { withCredentials: true }).subscribe();
     this.store.dispatch(signupAction(this.testForm.value));
   }
 
@@ -64,8 +70,9 @@ export class Auth implements OnInit {
   }
 
   private handleSuccessEvent() {
-    this.action$.pipe(ofType(signupSuccessAction)).subscribe({
+    this.action$.pipe(ofType(signupSuccessAction, loginSuccessAction)).subscribe({
       next: (res) => {
+        this.router.navigate(['/dashboard']);
         this.modalDescription = `${res.message} Plase login !` || 'Signup successful!';
         this.showModal.update(() => true);
       },
@@ -77,9 +84,5 @@ export class Auth implements OnInit {
       relativeTo: this.activatedRoute,
       queryParams: { mode: this.isLoginMode ? 'login' : 'signup' },
     });
-  }
-
-  test() {
-    this.http.post(`${BASE_URL}/refresh`, {}, { withCredentials: true }).subscribe();
   }
 }

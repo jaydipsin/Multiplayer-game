@@ -16,11 +16,23 @@ export class AuthService {
   signUp(payload: IsingUpPayload) {
     return this.http.post<IsignUpResponse>(
       `${BASE_URL}/${this.endPointService.SINGUP_URL}`,
-      payload
+      payload,
+      { withCredentials: true } // 👈 important
     );
   }
 
   login(payload: IloginPayload) {
-    return this.http.post<IloginResponse>(`${BASE_URL}/${this.endPointService.LOGIN_URL}`, payload);
+    return this.http.post<IloginResponse>(
+      `${BASE_URL}/${this.endPointService.LOGIN_URL}`,
+      payload,
+      { withCredentials: true } // 👈 important
+    );
+  }
+
+  refesh() {
+    return this.http.post<{ accessToken: string }>(
+      `${BASE_URL}/${this.endPointService.REFRESH}`,
+      {}
+    );
   }
 }

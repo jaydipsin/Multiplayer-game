@@ -4,33 +4,29 @@ import * as AuthAction from './auth.action';
 import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { of } from 'rxjs';
+import { Localstorage } from '../../services/localstorage';
 
 @Injectable()
 export class AuthEffect {
-  constructor(private authService: AuthService) {}
   private action$ = inject(Actions);
+  private authService = inject(AuthService);
+  private localStorageService = inject(Localstorage);
 
   signUp$ = createEffect(() => {
     return this.action$.pipe(
       ofType(AuthAction.signupAction),
       exhaustMap(({ username, email, password }) =>
         this.authService.signUp({ username, email, password }).pipe(
-          map((res) => AuthAction.signupSuccessAction({ ...res })),
+          map((res) => {
+            console.log(res);
+            return AuthAction.signupSuccessAction({ ...res });
+          }),
           catchError((error) => of(AuthAction.signupFailureAction({ error: error.message })))
         )
       )
     );
   });
 
-    // Might used in future
-  // signUpSuccess = createEffect(() => {
-  //   return this.action$.pipe(
-  //     ofType(AuthAction.signupSuccessAction),
-  //     tap((action) => {
-
-  //     })
-  //   )
-  // }, { dispatch: false });
   logIn$ = createEffect(() => {
     return this.action$.pipe(
       ofType(AuthAction.loginAction),
@@ -42,4 +38,15 @@ export class AuthEffect {
       )
     );
   });
+  saveAuthDataToLocalStorage$ = createEffect(
+    () => {
+      return this.action$.pipe(
+        ofType(AuthAction.signupSuccessAction, AuthAction.loginSuccessAction),
+        tap((action) => {
+          this.localStorageService.setUser({ ...action });
+        })
+      );
+    },
+    { dispatch: false }
+  );
 }

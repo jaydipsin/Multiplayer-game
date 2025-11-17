@@ -1,0 +1,80 @@
+<div class="host-container">
+  <div class="scanline-overlay"></div>
+  <div class="web-pattern-overlay"></div>
+
+  <nav class="bg-gray-900/50 backdrop-blur-sm border-b-2 border-[var(--color-primary)]/40 sticky top-0 z-10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="font-orbitron text-2xl text-white">
+          PROJECT<span class="text-[var(--color-primary)]">:HUB</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-white/80 hidden sm:block">Welcome, {{ userName }}</span>
+          <img class="h-10 w-10 rounded-full border-2 border-[var(--color-secondary)]" [src]="avatarUrl" alt="User Avatar">
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <header class="mb-8">
+      <h1 class="font-orbitron text-4xl sm:text-5xl glitch" data-text="[ DASHBOARD ]">[ DASHBOARD ]</h1>
+      <p class="text-white/60 mt-2 text-sm">// SYSTEM_STATUS: ONLINE // PROJECTS: ACTIVE</p>
+    </header>
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      @for (stat of stats; track stat.label) {
+        <div 
+          class="bg-gray-900/60 p-6 rounded-lg text-center transform hover:-translate-y-1 transition-transform duration-300"
+          [class.border-[var(--color-secondary)]/30]="stat.type === 'info'"
+          [class.border-[var(--color-primary)]/30]="stat.type === 'alert'">
+          <div class="font-orbitron text-5xl"
+              [class.text-[var(--color-secondary)]]="stat.type === 'info'"
+              [class.text-[var(--color-primary)]]="stat.type === 'alert'">
+            {{ stat.value }}
+          </div>
+          <div class="text-sm text-white/70 mt-2">{{ stat.label }}</div>
+        </div>
+      }
+    </section>
+
+    <section>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="font-orbitron text-3xl">PROJECT_FILES</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        @if (isAdmin) {
+          <button class="create-card group h-full bg-gray-900/50 rounded-lg border-2 border-dashed border-white/20 hover:border-solid hover:border-[var(--color-primary)]/50 flex flex-col items-center justify-center p-6 text-center transition-all duration-300 transform hover:-translate-y-2 hover:shadow-[rgba(var(--color-primary-rgb),0.25)]">
+            <svg class="w-16 h-16 text-white/30 group-hover:text-[var(--color-primary)] group-hover:scale-110 transition-all duration-300 animate-pulse group-hover:animate-none" 
+                 fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span class="font-orbitron text-xl text-white/60 group-hover:text-white mt-4">INITIATE_NEW_PROJECT</span>
+          </button>
+        }
+
+        @for (project of projects; track project.name) {
+          <a [routerLink]="`/dashboard/${project.link}`" routerLinkActive="router-link-active"  class="project-card block bg-gray-900/80 rounded-lg overflow-hidden border-2 border-transparent hover:border-[var(--color-primary)]/50 transition-all duration-300 shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.25)] transform hover:-translate-y-2">
+            <div class="relative">
+              <img class="project-image w-full h-48 object-cover transition-transform duration-300" [src]="project.imageUrl" alt="Project Thumbnail">
+              <div class="project-overlay absolute inset-0 bg-black opacity-40 transition-opacity duration-300"></div>
+              <div class="corner-bracket top-left"></div>
+              <div class="corner-bracket top-right"></div>
+              <div class="corner-bracket bottom-left"></div>
+              <div class="corner-bracket bottom-right"></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-orbitron text-xl mb-2">{{ project.name }}</h3>
+              <p class="text-white/60 text-sm mb-4">{{ project.description }}</p>
+              <div class="text-xs text-[var(--color-secondary)]/80">LAST_UPDATE: {{ project.lastUpdate }}</div>
+            </div>
+          </a>
+        }
+      </div>
+      
+    </section>
+  </main>
+</div>

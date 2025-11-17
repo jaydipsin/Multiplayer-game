@@ -1,0 +1,161 @@
+/* Styles for the component's root element */
+:host,
+.host-container {
+  display: block;
+  min-height: 100vh;
+  position: relative;
+}
+
+.font-orbitron {
+  font-family: var(--font-heading);
+}
+
+/* Background overlays */
+.scanline-overlay,
+.web-pattern-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.scanline-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 17, 40, 0) 0%,
+    rgba(10, 17, 40, 0.4) 50%,
+    rgba(10, 17, 40, 0) 100%
+  );
+  background-size: 100% 8px;
+  animation: scanline 10s linear infinite;
+}
+@keyframes scanline {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -200px;
+  }
+}
+
+.web-pattern-overlay {
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 0L0 100h100V0zM0 0l100 100V0z' fill='%23FFFFFF' fill-opacity='0.1'/%3E%3C/svg%3E");
+  background-size: 20px 20px;
+}
+
+/* Glitch effect on header */
+.glitch {
+  position: relative;
+  text-shadow: 0 0 5px var(--color-primary);
+}
+.glitch:before,
+.glitch:after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-background);
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.glitch:before {
+  left: -2px;
+  text-shadow: 2px 0 var(--color-secondary);
+  animation: glitch-anim-1 4s infinite linear alternate-reverse;
+}
+.glitch:after {
+  left: 2px;
+  text-shadow: -2px 0 var(--color-primary);
+  animation: glitch-anim-2 4s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim-1 {
+  0% {
+    clip: rect(15px, 9999px, 85px, 0);
+  }
+  100% {
+    clip: rect(85px, 9999px, 15px, 0);
+  }
+}
+@keyframes glitch-anim-2 {
+  0% {
+    clip: rect(5px, 9999px, 95px, 0);
+  }
+  100% {
+    clip: rect(95px, 9999px, 5px, 0);
+  }
+}
+
+/* Project Card specific styles */
+.project-card {
+  /* Set an initial, subtle border that is always there */
+  border: 2px solid transparent; /* Start with a transparent border */
+  transition: all 0.3s ease; /* Ensure all properties transition smoothly */
+}
+
+.project-card:hover {
+  /* Only change the color on hover, the border width is already set */
+  border-color: var(--color-primary); /* Apply the color */
+  box-shadow: rgba(var(--color-primary-rgb), 0.25) 0px 8px 24px; /* Adjust shadow */
+  transform: translateY(-8px); /* Adjust transform slightly for consistency */
+}
+
+/* Ensure the image and overlay still transform */
+.project-card:hover .project-image {
+  transform: scale(1.05);
+}
+.project-card:hover .project-overlay {
+  opacity: 0.7;
+}
+
+/* Corner brackets: no changes needed here as they are positioned absolutely */
+.project-card .corner-bracket {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--color-primary);
+  border-style: solid;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.project-card:hover .corner-bracket {
+  opacity: 0.6;
+}
+.corner-bracket.top-left {
+  top: 10px;
+  left: 10px;
+  border-width: 2px 0 0 2px;
+}
+.corner-bracket.top-right {
+  top: 10px;
+  right: 10px;
+  border-width: 2px 2px 0 0;
+}
+.corner-bracket.bottom-left {
+  bottom: 10px;
+  left: 10px;
+  border-width: 0 0 2px 2px;
+}
+.corner-bracket.bottom-right {
+  bottom: 10px;
+  right: 10px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Styles for the create card also need adjustment for consistency */
+.create-card {
+  border: 2px dashed rgba(255, 255, 255, 0.2); /* Initial dashed border */
+  transition: all 0.3s ease;
+}
+
+.create-card:hover {
+  border-style: solid; /* Change to solid on hover */
+  border-color: var(--color-primary); /* Apply primary color */
+  box-shadow: rgba(var(--color-primary-rgb), 0.25) 0px 8px 24px;
+  transform: translateY(-8px);
+}

@@ -19,7 +19,7 @@ export class Localstorage {
   updateUser(user: Partial<User>) {
     const currentUser = this.getUser();
     if (currentUser) {
-      const updateUser = { ...currentUser, user };
+      const updateUser = { ...currentUser, ...user };
       this.setUser(updateUser);
     } else {
       this.setUser(user as User);
