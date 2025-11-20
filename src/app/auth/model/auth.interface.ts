@@ -4,6 +4,7 @@ import { User } from '../../model/user.type';
 export interface authState {
   accessToken: string | null;
   isAuthenticated: boolean;
+  user:null;
   errorMessage: string | null;
 }
 

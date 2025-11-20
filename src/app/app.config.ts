@@ -19,15 +19,17 @@ import {
 } from '@angular/common/http';
 import { Auth } from './interceptors/auth';
 import { ErrorInterceptor } from './interceptors/error-interceptor';
+import { AppEffect } from './store/app.effect';
+import { reducers } from './store/app.reducer';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideStore(),
+    provideStore(reducers),
     provideHttpClient(withInterceptorsFromDi()),
-    provideEffects([AuthEffect]),
+    provideEffects([AuthEffect, AppEffect]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     {
       provide: HTTP_INTERCEPTORS,
