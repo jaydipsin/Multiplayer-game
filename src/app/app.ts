@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from './model/state.interface';
 import { autoLogin } from './store/app.action';
 import { SocketService } from './services/socket.service';
+import { user } from './store/app.selector';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,11 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.autoLogin();
-    this.socketService.connect();
+    this.store.select(user).subscribe({
+      next: (res) => {
+        this.socketService.connect(res?._id || '');
+      },
+    });
   }
 
   autoLogin() {

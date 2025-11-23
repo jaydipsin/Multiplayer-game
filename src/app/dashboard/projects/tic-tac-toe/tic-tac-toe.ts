@@ -1,10 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { DialogModal } from '../../../components/dialog-modal/dialog-modal';
-import { InviteModal } from "../../../components/invite-modal/invite-modal";
+import { InviteModal } from '../../../components/invite-modal/invite-modal';
+import { SocketService } from '../../../services/socket.service';
+import { Router } from '@angular/router';
+import { Toastr } from '../../../components/toastr/toastr';
+import { ToastrService } from '../../../shared/toastr.service';
 
 @Component({
   selector: 'app-tic-tac-toe',
-  imports: [DialogModal, InviteModal],
+  imports: [DialogModal, InviteModal, Toastr],
   templateUrl: './tic-tac-toe.html',
   styleUrl: './tic-tac-toe.css',
 })
@@ -20,7 +24,25 @@ export class TicTacToe implements OnInit {
 
   // --- Placeholder User Info ---
   userName = 'Spider-User';
-  avatarUrl = 'https://images.unsplash.com/photo-1531297484001-80022131c5a9?w=100';
+  avatarUrl = '';
+
+  constructor(
+    private socketService: SocketService,
+    private router: Router,
+    public toastService: ToastrService
+  ) {
+    // Listen to incoming invites
+
+    this.socketService.onGameStart.subscribe((game) => {
+      if (game) {
+        console.log('Game started!', game);
+        // Navigate to game room
+        this.router.navigate(['/game', game.roomId]);
+      }
+    });
+  }
+
+  // Your perfect method
 
   ngOnInit(): void {
     // this.startNewGame();
@@ -33,6 +55,11 @@ export class TicTacToe implements OnInit {
     this.winner = null;
     this.isDraw = false;
     this.updateStatusMessage();
+  }
+
+  onInviteCode(code: string) {
+    this.socketService.sendInvite(code);
+    this.toastService.show('info', 'Invitation Sent', '');
   }
 
   /** Handles a player's move when a cell is clicked */

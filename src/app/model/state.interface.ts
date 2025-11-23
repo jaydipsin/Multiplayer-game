@@ -3,5 +3,4 @@ import { User } from './user.type';
 
 export interface AppState {
   auth: authState ;
-  // user: User;
 }

@@ -1,0 +1,14 @@
+/* Add this to your global styles or component css */
+@keyframes shrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+.animate-shrink {
+  animation: shrink 5s linear forwards; /* 5s matches toast duration */
+}
+
+/* Optional: Glitch effect on hover similar to your modal header */
+.group:hover h3 {
+  text-shadow: 2px 0 rgba(255,0,0,0.5), -2px 0 rgba(0,0,255,0.5);
+}
