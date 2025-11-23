@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ActionsSubject, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import {
   loginAction,
   loginSuccessAction,
@@ -11,9 +11,7 @@ import {
 } from '../store/auth.action';
 import { DialogModal } from '../../components/dialog-modal/dialog-modal';
 import { Actions, ofType } from '@ngrx/effects';
-import { map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { BASE_URL } from '../../constants';
 import { Localstorage } from '../../services/localstorage';
 
 @Component({

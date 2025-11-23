@@ -12,6 +12,7 @@ export const AuthReducer = createReducer(
       ...state,
       errorMessage: null,
       accessToken: action.accessToken,
+      user:action.user
     };
   }),
   on(Authactions.signupFailureAction, (state: authState, action: { error: string }) => {
@@ -26,6 +27,7 @@ export const AuthReducer = createReducer(
       isAuthenticated: true,
       errorMessage: null,
       accessToken: action.accessToken,
+      user:action.user
     };
   }),
   on(Authactions.loginFailureAction, (state: authState, action: { error: string }) => {

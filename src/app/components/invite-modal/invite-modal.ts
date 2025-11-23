@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-invite-modal',
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './invite-modal.html',
   styleUrl: './invite-modal.css',
 })
@@ -30,7 +30,9 @@ export class InviteModal {
   }
 
   onConfirmClick(): void {
-    this.confirm.emit(this.enteredCode);
-    this.onCloseClick();
+    if (this.enteredCode.length === 6) {
+      this.confirm.emit(this.enteredCode);
+      this.onCloseClick();
+    }
   }
 }
