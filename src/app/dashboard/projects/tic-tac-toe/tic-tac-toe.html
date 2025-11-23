@@ -1,5 +1,7 @@
 @if(!isGameStart()){
-<app-invite-modal></app-invite-modal>
+<app-invite-modal (confirm)="onInviteCode($event)"></app-invite-modal>
+} @for (toast of toastService.toasts(); track toast.id) {
+<app-toastr [toast]="toast" (closed)="toastService.remove($event)"> </app-toastr>
 }
 
 <div class="host-container">

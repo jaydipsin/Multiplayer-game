@@ -7,7 +7,7 @@ import {
   IsingUpPayload,
 } from '../model/auth.interface';
 import { EndpointService } from './endpoint.service';
-import { BASE_URL } from '../../constants';
+import { URL } from '../../enviroment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -15,7 +15,7 @@ export class AuthService {
 
   signUp(payload: IsingUpPayload) {
     return this.http.post<IsignUpResponse>(
-      `${BASE_URL}/${this.endPointService.SINGUP_URL}`,
+      `${URL}/${this.endPointService.SINGUP_URL}`,
       payload,
       { withCredentials: true } // 👈 important
     );
@@ -23,16 +23,13 @@ export class AuthService {
 
   login(payload: IloginPayload) {
     return this.http.post<IloginResponse>(
-      `${BASE_URL}/${this.endPointService.LOGIN_URL}`,
+      `${URL}/${this.endPointService.LOGIN_URL}`,
       payload,
       { withCredentials: true } // 👈 important
     );
   }
 
   refesh() {
-    return this.http.post<{ accessToken: string }>(
-      `${BASE_URL}/${this.endPointService.REFRESH}`,
-      {}
-    );
+    return this.http.post<{ accessToken: string }>(`${URL}/${this.endPointService.REFRESH}`, {});
   }
 }

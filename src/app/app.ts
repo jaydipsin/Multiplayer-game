@@ -1,12 +1,32 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { AppState } from './model/state.interface';
+import { autoLogin } from './store/app.action';
+import { SocketService } from './services/socket.service';
+import { user } from './store/app.selector';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
+  constructor(private store: Store<AppState>, private socketService: SocketService) {}
+
+  ngOnInit(): void {
+    this.autoLogin();
+    this.store.select(user).subscribe({
+      next: (res) => {
+        this.socketService.connect(res?._id || '');
+      },
+    });
+  }
+
+  autoLogin() {
+    this.store.dispatch(autoLogin());
+  }
+
   protected readonly title = signal('frontend');
 }
