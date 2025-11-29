@@ -23,7 +23,7 @@ export class DashboardComponent {
   ];
 
   // --- Placeholder Project Data ---
-  projects: Project[] = [
+  projects: any[] = [
     {
       name: 'Tic Tac Toe',
       description: 'An game build by me.',

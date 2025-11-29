@@ -12,7 +12,7 @@ import { GameRoom } from '../../model/interface';
 
 @Component({
   selector: 'app-tic-tac-toe',
-  imports: [DialogModal, InviteModal, Toastr],
+  imports: [InviteModal, Toastr],
   templateUrl: './tic-tac-toe.html',
   styleUrl: './tic-tac-toe.css',
   standalone: true,
