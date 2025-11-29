@@ -36,7 +36,7 @@ export class SocketService {
 
   connect(userId: string) {
     console.log(userId);
-    
+
     this.socket = io('http://localhost:8000', {
       transports: ['websocket'],
       auth: { userId },
@@ -54,10 +54,10 @@ export class SocketService {
     this.socket.on('receive-invite', (invite: Invite) => {
       this.onReceiveInvite.next(invite);
     });
-    
+
     this.socket.on('invite-sent', ({ toCode }: { toCode: string }) => {
       this.onInviteSent.next(toCode);
-      console.log('Invitation recive : ', toCode);
+      console.log('Invitation sent : ', toCode);
     });
 
     this.socket.on('invite-error', ({ message }: { message: string }) => {
@@ -100,6 +100,10 @@ export class SocketService {
 
   makeMove(roomId: string, index: number) {
     this.socket.emit('make-move', { roomId, index });
+  }
+
+  restartGame() {
+    this.socket.emit('restart-game');
   }
 
   disconnect() {

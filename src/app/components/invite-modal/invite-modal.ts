@@ -9,15 +9,21 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './invite-modal.css',
 })
 export class InviteModal {
-  @Input() mode: 'share' | 'enter' = 'share';
+  @Input() modalType: 'input' | 'receive' = 'input';
 
-  @Input() title: string = 'GUEST INVITATION';
+  @Input() title: string = 'GAME INVITATION';
 
-  @Input() shareCode: string = 'LFG-42';
+  @Input() shareCode: string = '';
+
+  @Input() inviterName: string = '';
 
   @Output() confirm = new EventEmitter<string>();
 
   @Output() close = new EventEmitter<void>();
+
+  @Output() rejectInvite = new EventEmitter<void>();
+
+  @Output() acceptInvite = new EventEmitter<void>();
 
   public enteredCode: string = '';
 
@@ -32,7 +38,13 @@ export class InviteModal {
   onConfirmClick(): void {
     if (this.enteredCode.length === 6) {
       this.confirm.emit(this.enteredCode);
-      this.onCloseClick();
     }
+  }
+
+  onRejectClick() {
+    this.rejectInvite.emit();
+  }
+  onAcceptClick() {
+    this.acceptInvite.emit();
   }
 }
