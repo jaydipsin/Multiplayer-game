@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { URL } from '../enviroment';
 
 export interface User {
   _id: string;
@@ -37,7 +38,7 @@ export class SocketService {
   connect(userId: string) {
     console.log(userId);
 
-    this.socket = io('http://localhost:8000', {
+    this.socket = io(URL, {
       transports: ['websocket'],
       auth: { userId },
     });
