@@ -19,6 +19,7 @@ export class App implements OnInit {
     this.autoLogin();
     this.store.select(user).subscribe({
       next: (res) => {
+        console.log('eeeee : ', res);
         this.socketService.connect(res?._id || '');
       },
     });

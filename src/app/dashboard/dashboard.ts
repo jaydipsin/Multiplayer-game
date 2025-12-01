@@ -17,8 +17,6 @@ export class Dashboard implements OnInit {
   constructor(private handleReciveReq: HandleGameRequest) {}
 
   ngOnInit(): void {
-    this.handleReciveReq.onReqRecive();
-    this.handleReciveReq.onRejectReq();
   }
 
 }

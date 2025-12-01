@@ -1,120 +1,290 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, effect } from '@angular/core';
 import { DialogModal } from '../../../components/dialog-modal/dialog-modal';
 import { InviteModal } from '../../../components/invite-modal/invite-modal';
-import { SocketService } from '../../../services/socket.service';
+import { SocketService, Invite } from '../../../services/socket.service';
 import { Router } from '@angular/router';
 import { Toastr } from '../../../components/toastr/toastr';
 import { ToastrService } from '../../../shared/toastr.service';
+import { Subscription } from 'rxjs';
+import { Localstorage } from '../../../services/localstorage';
+import { ACTIVE_GAME_ROOM } from '../../../constants';
+import { GameRoom } from '../../model/interface';
 
 @Component({
   selector: 'app-tic-tac-toe',
-  imports: [DialogModal, InviteModal, Toastr],
+  imports: [InviteModal, Toastr],
   templateUrl: './tic-tac-toe.html',
   styleUrl: './tic-tac-toe.css',
+  standalone: true,
 })
-export class TicTacToe implements OnInit {
-  // --- Game State Properties ---
-  board: (string | null)[] = [];
-  currentPlayer: 'X' | 'O' = 'X';
-  winner: string | null = null;
-  isDraw = false;
-  statusMessage = '';
+export class TicTacToe implements OnInit, OnDestroy {
+  // Game State
+  board = signal<(string | null)[]>(Array(9).fill(null));
+  currentPlayer = signal<'X' | 'O'>('X');
+  winner = signal<string | null>(null);
+  isDraw = signal(false);
+  statusMessage = signal('');
   scores = { X: 0, O: 0 };
-  isGameStart = signal(false);
 
-  // --- Placeholder User Info ---
-  userName = 'Spider-User';
-  avatarUrl = '';
+  // Multiplayer State
+  roomId = signal<string | null>(null);
+  mySymbol = signal<'X' | 'O' | null>(null);
+  opponentName = signal<string>('');
+  isMyTurn = signal(false);
+  isWaitingForOpponent = signal(false);
+  userDetails: any;
+
+  // Invite Modal Control
+  isReciveInvitation = signal(false);
+  showInviteModal = signal(false);
+  incomingInvite = signal<Invite | null>(null);
+
+  // Game Active Flag
+  isGameActive = signal(false);
+
+  private sub = new Subscription();
 
   constructor(
     private socketService: SocketService,
     private router: Router,
-    public toastService: ToastrService
+    public toastService: ToastrService,
+    private localStorageService: Localstorage
   ) {
-    // Listen to incoming invites
+    // Auto-update status message when relevant signals change
+    effect(() => {
+      this.updateStatusMessage();
+    });
+  }
 
-    this.socketService.onGameStart.subscribe((game) => {
-      if (game) {
-        console.log('Game started!', game);
-        // Navigate to game room
-        this.router.navigate(['/game', game.roomId]);
+  ngOnInit(): void {
+    // Listen to all real-time events
+    this.setupSocketListeners();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions if needed (BehaviorSubject handles it)
+
+    this.sub.unsubscribe();
+  }
+
+  private setupSocketListeners(): void {
+    // Incoming Invite
+    this.sub.add(
+      this.socketService.onReceiveInvite.subscribe((invite) => {
+        if (invite && !this.isGameActive()) {
+          this.isReciveInvitation.set(true);
+          this.incomingInvite.set(invite);
+          this.showInviteModal.set(true);
+          this.toastService.show('info', `Invite from ${invite.fromName} (${invite.fromCode})`, '');
+        }
+      })
+    );
+
+    this.sub.add(
+      this.socketService.user$.subscribe({
+        next: (res) => {
+          this.userDetails = res;
+        },
+      })
+    );
+
+    // Invite Sent Confirmation
+    this.sub.add(
+      this.socketService.onInviteSent.subscribe((toCode) => {
+        if (toCode) {
+          this.isReciveInvitation.set(false);
+          this.toastService.show('success', `Invite sent to ${toCode}!`, 'Waiting for response...');
+        }
+      })
+    );
+
+    // Invite Rejected
+    this.sub.add(
+      this.socketService.onInviteRejected.subscribe((message) => {
+        if (message) {
+          this.toastService.show('error', 'Invite Rejected', message);
+        }
+      })
+    );
+
+    // Invite Error (user offline, self-invite, etc.)
+    this.sub.add(
+      this.socketService.onInviteError.subscribe((message) => {
+        if (message) {
+          this.toastService.show('error', 'Invite Failed', message);
+        }
+      })
+    );
+
+    // To start the game
+    this.sub.add(this.startGame());
+
+    // to oppnent move
+    this.sub.add(
+      this.socketService.onOpponentMove.subscribe(
+        (move: { index: number; symbol: 'X' | 'O'; nextTurn: 'X' | 'O' }) => {
+          if (move && this.isGameActive()) {
+            // 1. Update the board
+            this.board.update((b) => {
+              b[move.index] = move.symbol;
+              return [...b];
+            });
+
+            // 2. Update the Global Current Player (IMPORTANT: You were missing this!)
+            this.currentPlayer.set(move.nextTurn);
+
+            // 3. Update "Is it My Turn?" based on the NEW current player
+            const isItMyTurnNow = move.nextTurn === this.mySymbol();
+            this.isMyTurn.set(isItMyTurnNow);
+
+            // 4. Update status message so user sees "Opponent's Turn"
+            this.updateStatusMessage();
+          }
+        }
+      )
+    );
+
+    // Game Over from server (with result)
+    this.sub.add(
+      this.socketService.onGameOver.subscribe((result: any) => {
+        if (result) {
+          this.isGameActive.set(false);
+          if (result.winner) {
+            const won = result.winner === this.mySymbol();
+            this.winner.set(result.winner);
+            if (won) this.scores[result.winner as 'X' | 'O']++;
+            this.toastService.show(won ? 'success' : 'error', won ? 'You Win!' : 'You Lose!', '');
+          } else if (result.draw) {
+            this.isDraw.set(true);
+            this.toastService.show('info', 'Draw!', 'Good game!');
+          }
+        }
+      })
+    );
+  }
+  // To close the invite modal
+  onCloseModal() {
+    console.log('test');
+    this.router.navigate(['/dashboard']);
+  }
+
+  startGame() {
+    // Game Actually Starts
+    this.socketService.onGameStart.subscribe((gameData: GameRoom) => {
+      console.log(gameData);
+
+      if (gameData) {
+        this.roomId.set(gameData.roomId);
+        this.mySymbol.set(gameData.yourSymbol); // Now correct: "X" or "O"
+        this.opponentName.set(
+          gameData.yourSymbol === 'X' ? gameData.players.O.username : gameData.players.X.username
+        );
+        this.isMyTurn.set(gameData.yourSymbol === 'X'); // X starts
+        this.isGameActive.set(true);
+        this.isWaitingForOpponent.set(false);
+        this.board.set(Array(9).fill(null));
+        this.winner.set(null);
+        this.isReciveInvitation.set(false);
+        this.isDraw.set(false);
+
+        this.localStorageService.setData(ACTIVE_GAME_ROOM, gameData.roomId);
+
+        this.toastService.show(
+          'success',
+          `Game started! You are ${gameData.yourSymbol}`,
+          `vs ${this.opponentName()}`
+        );
       }
     });
   }
 
-  // Your perfect method
+  // Called from Invite Modal (child component)
+  onInviteCode(code: string): void {
+    if (!code.trim() || this.isGameActive()) return;
+    console.log('eeeee Code : ', code);
 
-  ngOnInit(): void {
-    // this.startNewGame();
+    this.socketService.sendInvite(code.toUpperCase().trim());
+    this.showInviteModal.set(false);
   }
 
-  /** Resets the game board to its initial state for a new round */
-  startNewGame(): void {
-    this.board = Array(9).fill(null);
-    this.currentPlayer = 'X';
-    this.winner = null;
-    this.isDraw = false;
-    this.updateStatusMessage();
+  acceptInvite(): void {
+    const invite = this.incomingInvite();
+    if (invite) {
+      this.socketService.acceptInvite(invite.fromSocketId);
+      this.isWaitingForOpponent.set(true);
+      this.toastService.show('info', 'Invite accepted!', 'Waiting for opponent...');
+    }
+    this.closeInviteModal();
   }
 
-  onInviteCode(code: string) {
-    this.socketService.sendInvite(code);
-    this.toastService.show('info', 'Invitation Sent', '');
+  rejectInvite(): void {
+    const invite = this.incomingInvite();
+    if (invite) {
+      this.socketService.rejectInvite(invite.fromSocketId);
+      this.toastService.show(
+        'error',
+        'Invite rejected',
+        `You declined ${invite.fromName}'s invite`
+      );
+    }
+    this.closeInviteModal();
   }
 
-  /** Handles a player's move when a cell is clicked */
+  closeInviteModal(): void {
+    this.showInviteModal.set(false);
+    this.incomingInvite.set(null);
+  }
+
+  // Player clicks a cell
   makeMove(index: number): void {
-    if (this.board[index] || this.winner) {
-      return; // If the cell is taken or the game is over, do nothing
+    if (
+      !this.isGameActive() ||
+      this.board()[index] ||
+      !this.isMyTurn() ||
+      this.winner() ||
+      this.isDraw()
+    ) {
+      console.log(
+        !this.isGameActive(),
+        this.board()[index],
+        !this.isMyTurn(),
+        this.winner(),
+        this.isDraw()
+      );
+
+      return;
     }
 
-    this.board[index] = this.currentPlayer;
-    this.checkForWinner();
+    // Optimistically update UI
+    this.board.update((b) => {
+      b[index] = this.mySymbol()!;
+      return [...b];
+    });
 
-    if (!this.winner) {
-      this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
-      this.updateStatusMessage();
-    }
+    // Send move to server
+    this.socketService.makeMove(this.roomId()!, index);
+
+    // Switch turn locally
+    this.isMyTurn.set(false);
   }
 
-  /** Checks all winning combinations and for a draw */
-  private checkForWinner(): void {
-    const winningCombos = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8], // Rows
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8], // Columns
-      [0, 4, 8],
-      [2, 4, 6], // Diagonals
-    ];
-
-    for (const combo of winningCombos) {
-      const [a, b, c] = combo;
-      if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
-        this.winner = this.currentPlayer;
-        this.scores[this.winner as 'X' | 'O']++;
-        this.updateStatusMessage();
-        return;
-      }
-    }
-
-    // If all cells are filled and there's no winner, it's a draw
-    if (!this.board.includes(null)) {
-      this.isDraw = true;
-      this.updateStatusMessage();
-    }
+  // Restart game
+  onRestartGame() {
+    this.socketService.restartGame();
   }
 
-  /** Updates the main status message based on the game state */
   private updateStatusMessage(): void {
-    if (this.winner) {
-      this.statusMessage = `[ PLAYER ${this.winner} WINS! ]`;
-    } else if (this.isDraw) {
-      this.statusMessage = `[ STALEMATE ]`;
+    if (this.winner()) {
+      const won = this.winner() === this.mySymbol();
+      this.statusMessage.set(won ? 'YOU WIN!' : 'OPPONENT WINS!');
+    } else if (this.isDraw()) {
+      this.statusMessage.set('DRAW!');
+    } else if (this.isWaitingForOpponent()) {
+      this.statusMessage.set('Waiting for opponent...');
+    } else if (!this.isGameActive()) {
+      this.statusMessage.set('Find an opponent to play!');
     } else {
-      this.statusMessage = `[ PLAYER ${this.currentPlayer}'S_TURN ]`;
+      this.statusMessage.set(this.isMyTurn() ? 'Your turn!' : "Opponent's turn");
     }
   }
 }
