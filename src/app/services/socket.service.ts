@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { URL } from '../enviroment';
 
 export interface User {
   _id: string;
@@ -36,8 +37,8 @@ export class SocketService {
 
   connect(userId: string) {
     console.log(userId);
-    
-    this.socket = io('http://localhost:8000', {
+
+    this.socket = io(URL, {
       transports: ['websocket'],
       auth: { userId },
     });
@@ -54,10 +55,10 @@ export class SocketService {
     this.socket.on('receive-invite', (invite: Invite) => {
       this.onReceiveInvite.next(invite);
     });
-    
+
     this.socket.on('invite-sent', ({ toCode }: { toCode: string }) => {
       this.onInviteSent.next(toCode);
-      console.log('Invitation recive : ', toCode);
+      console.log('Invitation sent : ', toCode);
     });
 
     this.socket.on('invite-error', ({ message }: { message: string }) => {
@@ -100,6 +101,10 @@ export class SocketService {
 
   makeMove(roomId: string, index: number) {
     this.socket.emit('make-move', { roomId, index });
+  }
+
+  restartGame() {
+    this.socket.emit('restart-game');
   }
 
   disconnect() {

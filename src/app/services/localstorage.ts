@@ -16,6 +16,10 @@ export class Localstorage {
     localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
   }
 
+  setData( key: string,val: any,) {
+    localStorage.setItem(key, JSON.stringify(val));
+  }
+
   getUser(): lsUser | null {
     const user = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
     return user ? JSON.parse(user) : null;

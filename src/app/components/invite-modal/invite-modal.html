@@ -17,64 +17,90 @@
     >
       <h2
         class="font-orbitron text-xl text-[var(--color-text-light)] glitch"
-        [attr.data-text]="title"
+        [attr.data-text]="modalType === 'receive' ? 'INCOMING SIGNAL' : 'ENTER CREDENTIALS'"
       >
-        {{ title }}
+        {{ modalType === 'receive' ? 'INCOMING SIGNAL' : 'ENTER CREDENTIALS' }}
       </h2>
-      <button
-        (click)="onCloseClick()"
-        class="text-white/50 hover:text-[var(--color-primary)] transition-colors duration-300"
-        aria-label="Close modal"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          ></path>
-        </svg>
-      </button>
+      
+      @if (modalType === 'input') {
+        <button
+          (click)="onCloseClick()"
+          class="text-white/50 hover:text-[var(--color-primary)] transition-colors duration-300"
+          aria-label="Close modal"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      }
     </header>
 
-    <section class="py-6 text-white/80 space-y-4">
-      <div *ngIf="mode === 'share'">
-        <p>Share this code with your guest so they can join:</p>
-        <div class="my-4 p-4 text-center bg-black/30 border border-white/20 rounded-lg">
-          <span class="font-orbitron text-3xl tracking-widest text-[var(--color-primary)]">
-            {{ shareCode }}
-          </span>
+    <section class="py-8 text-white/80">
+      
+      @if (modalType === 'receive') {
+        <div class="text-center space-y-4">
+          <div class="animate-pulse">
+            <p class="text-lg font-orbitron text-[var(--color-primary)] tracking-wider">
+              USER REQUEST DETECTED
+            </p>
+          </div>
+          <p class="text-white/60">
+            <span class="text-white font-bold">{{ inviterName || 'Unknown User' }}</span> 
+            is challenging you to a duel.
+          </p>
         </div>
-        <p class="text-sm text-white/60">This code is single-use and will expire.</p>
-      </div>
+      }
 
-      <div>
-        <p>Enter the invitation code you received to join:</p>
-        <input
-          [(ngModel)]="enteredCode"
-          type="text"
-          placeholder="ENTER CODE"
-          class="form-input w-full mt-4 text-center font-orbitron text-2xl tracking-widest"
-          maxlength="10"
-          autofocus
-        />
-      </div>
+      @if (modalType === 'input') {
+        <div>
+          <p class="text-sm text-white/60 mb-2">Enter the access code to establish connection:</p>
+          <input
+            [(ngModel)]="enteredCode"
+            type="text"
+            placeholder="ENTER CODE"
+            class="form-input w-full bg-black/50 border border-[var(--color-primary)]/30 text-white text-center font-orbitron text-2xl tracking-widest py-3 focus:outline-none focus:border-[var(--color-primary)] focus:shadow-[0_0_10px_rgba(var(--color-primary-rgb),0.4)] transition-all"
+            maxlength="10"
+            autofocus
+          />
+        </div>
+      }
     </section>
 
-    <footer class="flex justify-end pt-4 space-x-4">
-      <button
-        (click)="onCloseClick()"
-        class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
-      >
-        [ Close ]
-      </button>
-      <button
-        (click)="onConfirmClick()"
-        [disabled]="enteredCode.length !== 6 ? true : false"
-        class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
-      >
-        [ Submit ]
-      </button>
+    <footer class="flex justify-end pt-4 gap-4 border-t border-[var(--color-primary)]/20">
+      
+      @if (modalType === 'receive') {
+        <button
+          (click)="onRejectClick()"
+          class="cursor-pointer bg-red-900/80 border border-red-500/50 text-red-100 font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/30"
+        >
+          [ REJECT ]
+        </button>
+        <button
+          (click)="onAcceptClick()"
+          class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] animate-pulse-slow"
+        >
+          [ ACCEPT ]
+        </button>
+      }
+
+      @if (modalType === 'input') {
+        <button
+          (click)="onCloseClick()"
+          class="cursor-pointer bg-transparent border border-white/20 text-white/70 font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-white/10 hover:text-white"
+        >
+          [ CANCEL ]
+        </button>
+        <button
+          (click)="onConfirmClick()"
+          [disabled]="enteredCode.length < 4"
+          [class.opacity-50]="enteredCode.length < 4"
+          [class.cursor-not-allowed]="enteredCode.length < 4"
+          class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
+        >
+          [ JOIN ]
+        </button>
+      }
+      
     </footer>
   </main>
 </div>
