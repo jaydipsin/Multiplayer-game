@@ -1,4 +1,4 @@
-@if(!isGameActive()){
+@if(!isGameActive() && !winner() && !isDraw()){
 <app-invite-modal
   [modalType]="isReciveInvitation() ? 'receive' : 'input'"
   (confirm)="onInviteCode($event)"
@@ -6,7 +6,9 @@
   (acceptInvite)="acceptInvite()"
   (rejectInvite)="rejectInvite()"
 ></app-invite-modal>
-} @for (toast of toastService.toasts(); track toast.id) {
+} 
+
+@for (toast of toastService.toasts(); track toast.id) {
 <app-toastr [toast]="toast" (closed)="toastService.remove($event)"> </app-toastr>
 }
 
@@ -14,30 +16,25 @@
   <div class="scanline-overlay"></div>
   <div class="web-pattern-overlay"></div>
 
-  <nav
-    class="bg-gray-900/50 backdrop-blur-sm border-b-2 border-[var(--color-primary)]/40 sticky top-0 z-10"
-  >
+  <nav class="bg-gray-900/50 backdrop-blur-sm border-b-2 border-[var(--color-primary)]/40 sticky top-0 z-10">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="font-orbitron text-2xl text-white">
           BATTLE<span class="text-[var(--color-primary)]">:GRID</span>
         </div>
         <div class="flex items-center space-x-4">
-          <span class="text-white/80 hidden sm:block">Welcome, {{ userDetails.username }} </span>
-          <img
-            class="h-10 w-10 rounded-full border-2 border-[var(--color-secondary)]"
-            [src]=""
-            alt="User Avatar"
-          />
+          <span class="text-white/80 hidden sm:block">Welcome, {{ userDetails?.username }} </span>
+          <div class="h-10 w-10 rounded-full border-2 border-[var(--color-secondary)] bg-gray-700 flex items-center justify-center text-white font-bold">
+            {{ userDetails?.username?.charAt(0).toUpperCase() }}
+          </div>
         </div>
       </div>
     </div>
   </nav>
 
   <main class="container mx-auto h-[calc(100vh-66px-32px)] px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
-    <div
-      class="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-sm border-2 border-[var(--color-primary)]/40 rounded-lg p-6 sm:p-8 shadow-2xl shadow-[rgba(var(--color-primary-rgb),0.2)]"
-    >
+    <div class="relative w-full max-w-lg bg-gray-900/80 backdrop-blur-sm border-2 border-[var(--color-primary)]/40 rounded-lg p-6 sm:p-8 shadow-2xl shadow-[rgba(var(--color-primary-rgb),0.2)]">
+      
       <div class="corner-bracket top-left"></div>
       <div class="corner-bracket top-right"></div>
       <div class="corner-bracket bottom-left"></div>
@@ -47,46 +44,73 @@
         <h1 class="font-orbitron text-3xl sm:text-4xl glitch" [attr.data-text]="statusMessage()">
           {{ statusMessage() }}
         </h1>
+        
         <div class="flex justify-center items-center space-x-6 mt-4 text-xl font-orbitron">
-          <div class="text-[var(--color-primary)]">Player X: {{ scores.X }}</div>
-          <div class="text-white/50">VS</div>
-          <div class="text-[var(--color-secondary)]">Player O: {{ scores.O }}</div>
+          <div class="flex flex-col items-center">
+            <span class="text-xs text-white/50 uppercase">Player X</span>
+            <span class="text-[var(--color-primary)] text-3xl">{{ scores().X }}</span>
+          </div>
+          <div class="text-white/20 text-2xl">|</div>
+          <div class="flex flex-col items-center">
+            <span class="text-xs text-white/50 uppercase">Player O</span>
+            <span class="text-[var(--color-secondary)] text-3xl">{{ scores().O }}</span>
+          </div>
         </div>
       </header>
 
-      <div class="game-board w-full max-w-md mx-auto relative justify-center">
+      <div class="game-board w-full max-w-md mx-auto grid grid-cols-3 gap-2 relative justify-center">
         @for (cell of board(); track $index) {
-          <div class="w-32 flex justify-self-center">
-            <button
-              class="game-cell group w-full"
-              (click)="makeMove($index)"
-              [class.cell-x]="cell === 'X'"
-              [class.cell-o]="cell === 'O'"
-            >
-              {{ cell }}
-    
-              @if (!cell && !winner) {
-              <span
-                class="absolute text-6xl opacity-0 group-hover:opacity-20 transition-opacity"
-                [class.text-[var(--color-primary)]]="currentPlayer() === 'X'"
-                [class.text-[var(--color-secondary)]]="currentPlayer() === 'O'"
-              >
-                {{ currentPlayer() }}
+          <button
+            class="game-cell group h-24 sm:h-32 text-5xl font-orbitron transition-all duration-200"
+            (click)="makeMove($index)"
+            [disabled]="cell !== null || !!winner() || isDraw() || !isMyTurn()"
+            [class.cell-x]="cell === 'X'"
+            [class.cell-o]="cell === 'O'"
+            [class.cursor-not-allowed]="cell !== null || !!winner()"
+          >
+            {{ cell }}
+            @if (!cell && !winner() && !isDraw() && isMyTurn()) {
+              <span class="absolute opacity-0 group-hover:opacity-20 transition-opacity">
+                {{ mySymbol() }}
               </span>
-              }
-            </button>
+            }
+          </button>
+        }
+
+        @if (winner() || isDraw()) {
+          <div class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md rounded-lg border-2 border-[var(--color-primary)] animate-in fade-in zoom-in duration-300">
+            <h2 class="font-orbitron text-4xl mb-6 text-white text-center">
+              {{ winner() ? (winner() === mySymbol() ? 'VICTORY' : 'DEFEAT') : 'DRAW' }}
+            </h2>
+            
+            <div class="flex flex-col space-y-4 w-64">
+              <button
+                (click)="onRestartGame()"
+                class="font-orbitron bg-[var(--color-primary)] text-white py-3 px-6 rounded-sm hover:scale-105 transition-transform shadow-lg shadow-[var(--color-primary)]/40"
+              >
+                PLAY AGAIN
+              </button>
+              
+              <button
+                (click)="onExitGame()"
+                class="font-orbitron border border-red-500 text-red-500 py-3 px-6 rounded-sm hover:bg-red-500 hover:text-white transition-all"
+              >
+                EXIT SESSION
+              </button>
+            </div>
           </div>
         }
       </div>
 
-      <footer class="mt-8 text-center">
-        <button
-          (click)="onRestartGame()"
-          class="cursor-pointer bg-[var(--color-primary)] text-white font-bold py-2 px-8 rounded-md transition-all duration-300 hover:bg-[var(--color-primary-dark)] hover:shadow-lg hover:shadow-[rgba(var(--color-primary-rgb),0.5)] transform hover:-translate-y-1 active:translate-y-0"
-        >
-          [ RESET_GRID ]
-        </button>
-      </footer>
+      @if (isGameActive() && !winner() && !isDraw()) {
+        <footer class="mt-8 text-center">
+          <div class="inline-block px-4 py-2 border border-[var(--color-primary)]/20 rounded bg-black/40">
+             <span class="text-white/60 font-orbitron uppercase text-sm">
+               System: {{ isMyTurn() ? 'Waiting for your input...' : 'Waiting for opponent move...' }}
+             </span>
+          </div>
+        </footer>
+      }
     </div>
   </main>
 </div>

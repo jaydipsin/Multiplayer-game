@@ -24,7 +24,6 @@ export class TicTacToe implements OnInit, OnDestroy {
   winner = signal<string | null>(null);
   isDraw = signal(false);
   statusMessage = signal('');
-  scores = { X: 0, O: 0 };
 
   // Multiplayer State
   roomId = signal<string | null>(null);
@@ -41,6 +40,7 @@ export class TicTacToe implements OnInit, OnDestroy {
 
   // Game Active Flag
   isGameActive = signal(false);
+  scores = signal<{ X: number; O: number }>({ X: 0, O: 0 });
 
   private sub = new Subscription();
 
@@ -59,12 +59,6 @@ export class TicTacToe implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Listen to all real-time events
     this.setupSocketListeners();
-  }
-
-  ngOnDestroy(): void {
-    // Clean up subscriptions if needed (BehaviorSubject handles it)
-
-    this.sub.unsubscribe();
   }
 
   private setupSocketListeners(): void {
@@ -149,15 +143,50 @@ export class TicTacToe implements OnInit, OnDestroy {
       this.socketService.onGameOver.subscribe((result: any) => {
         if (result) {
           this.isGameActive.set(false);
+          // Update persistent scores from server
+          if (result.scores) {
+            this.scores.set(result.scores);
+          }
+
           if (result.winner) {
             const won = result.winner === this.mySymbol();
             this.winner.set(result.winner);
-            if (won) this.scores[result.winner as 'X' | 'O']++;
+            this.isGameActive.set(false);
             this.toastService.show(won ? 'success' : 'error', won ? 'You Win!' : 'You Lose!', '');
           } else if (result.draw) {
             this.isDraw.set(true);
-            this.toastService.show('info', 'Draw!', 'Good game!');
           }
+        }
+      })
+    );
+
+    this.sub.add(
+      this.socketService.onGameRestarted.subscribe((data: any) => {
+        if (data) {
+          // Reset UI state but keep the session alive
+          this.board.set(data.board);
+          this.currentPlayer.set(data.currentTurn);
+          this.isMyTurn.set(this.mySymbol() === data.currentTurn);
+          this.winner.set(null);
+          this.isDraw.set(false);
+          this.isGameActive.set(true);
+          this.toastService.show('info', 'Round Restarted!', 'Good luck!');
+        }
+      })
+    );
+
+    this.sub.add(
+      this.socketService.onGameClosed.subscribe((data: any) => {
+        if (data) {
+          this.isGameActive.set(false);
+          this.winner.set(null);
+          this.isDraw.set(false);
+
+          this.board.set(Array(9).fill(null));
+          this.roomId.set(null);
+
+          this.socketService.onGameClosed.next(null);
+          this.router.navigate(['/dashboard']);
         }
       })
     );
@@ -270,7 +299,24 @@ export class TicTacToe implements OnInit, OnDestroy {
 
   // Restart game
   onRestartGame() {
-    this.socketService.restartGame();
+    const currentRoom = this.roomId();
+    if (!currentRoom) {
+      console.error('Cannot restart: No Room ID found');
+      return;
+    }
+    this.socketService.restartGame(currentRoom);
+  }
+
+  onExitGame() {
+    const rid = this.roomId();
+
+    if (rid) {
+      this.socketService.exitGame(rid); // Call the socket event
+      this.localStorageService.removeDate(ACTIVE_GAME_ROOM);
+      this.router.navigate(['/dashboard']);
+      this.isGameActive.set(false);
+    }
+    this.router.navigate(['/dashboard']);
   }
 
   private updateStatusMessage(): void {
@@ -286,5 +332,17 @@ export class TicTacToe implements OnInit, OnDestroy {
     } else {
       this.statusMessage.set(this.isMyTurn() ? 'Your turn!' : "Opponent's turn");
     }
+  }
+
+  ngOnDestroy(): void {
+    this.socketService.onGameClosed.next(null);
+    this.socketService.onGameOver.next(null);
+    this.socketService.onGameRestarted.next(null);
+    this.socketService.onGameStart.next(null);
+    this.socketService.onInviteError.next(null);
+    this.socketService.onInviteRejected.next(null);
+    this.socketService.onInviteSent.next(null);
+    this.socketService.onReceiveInvite.next(null);
+    this.sub.unsubscribe();
   }
 }

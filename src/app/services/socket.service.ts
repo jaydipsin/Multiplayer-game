@@ -32,8 +32,10 @@ export class SocketService {
   public onInviteError = new BehaviorSubject<string | null>(null);
   public onInviteRejected = new BehaviorSubject<string | null>(null);
   public onGameStart = new BehaviorSubject<any>(null);
+  public onGameRestarted = new BehaviorSubject<any>(null);
   public onOpponentMove = new BehaviorSubject<any>(null);
   public onGameOver = new BehaviorSubject<any>(null);
+  public onGameClosed = new BehaviorSubject<any>(null);
 
   connect(userId: string) {
     console.log(userId);
@@ -77,8 +79,15 @@ export class SocketService {
       this.onOpponentMove.next(move);
     });
 
+    this.socket.on('game-restarted', (data) => {
+      this.onGameRestarted.next(data);
+    });
+
     this.socket.on('game-over', (result) => {
       this.onGameOver.next(result);
+    });
+    this.socket.on('game-closed', (result) => {
+      this.onGameClosed.next(result);
     });
 
     this.socket.on('disconnect', () => {
@@ -100,11 +109,19 @@ export class SocketService {
   }
 
   makeMove(roomId: string, index: number) {
+    console.log('Moved ');
+
     this.socket.emit('make-move', { roomId, index });
   }
 
-  restartGame() {
-    this.socket.emit('restart-game');
+  // Update the method to accept roomId
+  restartGame(roomId: string) {
+    // MATCH THE BACKEND EVENT NAME: 'restart-game'
+    // AND PASS THE ROOMID OBJECT
+    this.socket.emit('restart-game', { roomId });
+  }
+  exitGame(roomId: string) {
+    this.socket.emit('exit-game', { roomId });
   }
 
   disconnect() {

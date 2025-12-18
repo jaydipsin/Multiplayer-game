@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './invite-modal.html',
   styleUrl: './invite-modal.css',
 })
-export class InviteModal {
+export class InviteModal implements OnInit {
   @Input() modalType: 'input' | 'receive' = 'input';
 
   @Input() title: string = 'GAME INVITATION';
@@ -26,6 +26,11 @@ export class InviteModal {
   @Output() acceptInvite = new EventEmitter<void>();
 
   public enteredCode: string = '';
+
+  ngOnInit(): void {
+    console.log(this.modalType);
+    
+  }
 
   onDialogClick(event: Event): void {
     event.stopPropagation();

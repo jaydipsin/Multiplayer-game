@@ -15,9 +15,11 @@ export class Localstorage {
   setUser(user: lsUser) {
     localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
   }
-
-  setData( key: string,val: any,) {
+  setData(key: string, val: any) {
     localStorage.setItem(key, JSON.stringify(val));
+  }
+  removeDate(key: string) {
+    localStorage.removeItem(key);
   }
 
   getUser(): lsUser | null {
