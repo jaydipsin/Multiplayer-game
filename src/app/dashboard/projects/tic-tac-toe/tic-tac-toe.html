@@ -1,6 +1,7 @@
 @if(!isGameActive() && !winner() && !isDraw()){
 <app-invite-modal
   [modalType]="isReciveInvitation() ? 'receive' : 'input'"
+  [shareCode]=""
   (confirm)="onInviteCode($event)"
   (close)="onCloseModal()"
   (acceptInvite)="acceptInvite()"
