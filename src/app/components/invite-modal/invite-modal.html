@@ -21,6 +21,8 @@
       >
         {{ modalType === 'receive' ? 'INCOMING SIGNAL' : 'ENTER CREDENTIALS' }}
       </h2>
+
+      <h2 class="font-orbitron text-xl text-[var(--color-text-light)] glitch">{{shareCode}}</h2>
       
       @if (modalType === 'input') {
         <button
